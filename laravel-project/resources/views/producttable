@@ -1,0 +1,151 @@
+User Side (Front-End)
+Users Table
+
+Functionality: User registration, login, profile management, and possibly viewing order history.
+Products Table
+
+Functionality: Displaying product listings, detailed product pages, filtering products by categories, and searching for products.
+Categories Table
+
+Functionality: Organizing products for easier navigation and filtering.
+Images Table
+
+Functionality: Displaying product images on product detail pages.
+Reviews Table
+
+Functionality: Allowing users to leave reviews and ratings for products they have purchased.
+Promotions Table
+
+Functionality: Displaying discounts and promotions to users.
+
+
+Admin Side (Back-End)
+Users Table
+
+Functionality: Admin can manage users, reset passwords, and manage user roles (if applicable).
+Products Table
+
+Functionality: Admin can add, update, and delete products. This includes managing stock levels, prices, and product details.
+Categories Table
+
+Functionality: Admin can create, update, or delete product categories.
+Images Table
+
+Functionality: Admin can upload, update, or delete images associated with products.
+Reviews Table
+
+Functionality: Admin can moderate reviews, remove inappropriate content, and analyze customer feedback.
+Inventory Table
+
+Functionality: Admin can manage stock quantities and variations (sizes/colors).
+Promotions Table
+
+Functionality: Admin can create, update, and delete promotions or discounts on products.
+
+
+Users Table
+
+Start with the Users table because it doesn't depend on any other table.
+sql
+Copy code
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(255) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+Categories Table
+
+Next, create the Categories table, which also does not depend on other tables.
+sql
+Copy code
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY AUTO_INCREMENT,
+    CategoryName VARCHAR(255) NOT NULL,
+    ParentCategoryID INT,
+    FOREIGN KEY (ParentCategoryID) REFERENCES Categories(CategoryID)
+);
+Products Table
+
+Create the Products table next, as it depends on the Categories table.
+sql
+Copy code
+
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255) NOT NULL,
+    Description TEXT,
+    Image VARCHAR(255),
+    Price DECIMAL(10, 2) NOT NULL,
+    Status ENUM('active', 'inactive') DEFAULT 'active',
+    CategoryID INT,
+    SKU VARCHAR(100) UNIQUE,
+    StockQuantity INT DEFAULT 0,
+    Size VARCHAR(50),
+    Color VARCHAR(50),
+    Rating DECIMAL(2, 1) DEFAULT 0.0,
+    DiscountPercentage DECIMAL(5, 2) DEFAULT 0.0,
+    MetaDescription TEXT,
+    MetaKeywords TEXT,
+    IsFeatured BOOLEAN DEFAULT FALSE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE SET NULL
+);
+
+Images Table
+
+Next, create the Images table, which depends on the Products table.
+sql
+Copy code
+CREATE TABLE Images (
+    ImageID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductID INT,
+    ImageURL VARCHAR(255) NOT NULL,
+    IsPrimary BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+Reviews Table
+
+Create the Reviews table next, as it requires both Products and Users.
+sql
+Copy code
+CREATE TABLE Reviews (
+    ReviewID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductID INT,
+    UserID INT,
+    Rating INT CHECK (Rating BETWEEN 1 AND 5),
+    Comment TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+Inventory Table
+
+Create the Inventory table, which depends on the Products table.
+sql
+Copy code
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductID INT,
+    StockQuantity INT NOT NULL,
+    Size VARCHAR(50),
+    Color VARCHAR(50),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+Promotions Table
+
+Finally, create the Promotions table, which depends on the Products table.
+sql
+Copy code
+CREATE TABLE Promotions (
+    PromotionID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductID INT,
+    DiscountPercentage DECIMAL(5, 2),
+    StartDate DATE,
+    EndDate DATE,
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+Summary
+This order ensures that each table is created only after its dependencies have been established, preventing foreign key constraint errors. After you create the tables, you can then proceed to implement the application logic and connect them as needed. Let me know if you need any more help!
